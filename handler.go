@@ -53,6 +53,13 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 		return true
 	})
 
+	textFormat := func() string {
+		if n.group != "" {
+			return fmt.Sprintf("%s | %s", n.group, n.textOutputFormat)
+		}
+		return n.textOutputFormat
+	}
+
 	outLoc := func() io.Writer {
 		if record.Level >= slog.LevelError {
 			return n.err
@@ -62,7 +69,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 
 	if !n.json {
 		if len(attrs) == 0 {
-			fmt.Fprintf(outLoc(), n.textOutputFormat, record.Level, record.Time.Format(n.timeFormat), record.Message)
+			fmt.Fprintf(outLoc(), textFormat(), record.Level, record.Time.Format(n.timeFormat), record.Message)
 		} else {
 			attsString := strings.Builder{}
 			for i, a := range attrs {
@@ -71,7 +78,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 					attsString.WriteString(" ")
 				}
 			}
-			output := strings.TrimSpace(n.textOutputFormat) + " " + attsString.String() + "\n"
+			output := strings.TrimSpace(textFormat()) + " " + attsString.String() + "\n"
 			fmt.Fprintf(outLoc(), output, record.Level, record.Time.Format(n.timeFormat), record.Message)
 		}
 	} else {

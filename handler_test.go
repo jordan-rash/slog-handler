@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log/slog"
+	"strings"
 	"testing"
 	"time"
 
@@ -25,6 +26,7 @@ func TestNewHandlerText(t *testing.T) {
 		{name: "warn_level", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelWarn)}, log: "test", expected: fmt.Sprintf("[ERROR] %s - test\n[WARN] %s - test\n", now, now)},
 		{name: "info_level", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelInfo)}, log: "test", expected: fmt.Sprintf("[ERROR] %s - test\n[WARN] %s - test\n[INFO] %s - test\n", now, now, now)},
 		{name: "debug_level", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelDebug)}, log: "test", expected: fmt.Sprintf("[ERROR] %s - test\n[WARN] %s - test\n[INFO] %s - test\n[DEBUG] %s - test\n", now, now, now, now)},
+		{name: "debug_level_group", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelDebug)}, log: "test", expected: fmt.Sprintf("group | [ERROR] %s - test\ngroup | [WARN] %s - test\ngroup | [INFO] %s - test\ngroup | [DEBUG] %s - test\n", now, now, now, now)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -32,10 +34,17 @@ func TestNewHandlerText(t *testing.T) {
 			tt.opts = append(tt.opts, handler.WithStdOut(&stdout), handler.WithStdErr(&stdout))
 			logger := slog.New(handler.NewHandler(tt.opts...))
 
-			logger.Error(tt.log)
-			logger.Warn(tt.log)
-			logger.Info(tt.log)
-			logger.Debug(tt.log)
+			if strings.HasSuffix(tt.name, "_group") {
+				logger.WithGroup("group").Error(tt.log)
+				logger.WithGroup("group").Warn(tt.log)
+				logger.WithGroup("group").Info(tt.log)
+				logger.WithGroup("group").Debug(tt.log)
+			} else {
+				logger.Error(tt.log)
+				logger.Warn(tt.log)
+				logger.Info(tt.log)
+				logger.Debug(tt.log)
+			}
 			assert.Equal(t, tt.expected, stdout.String())
 		})
 	}
@@ -54,6 +63,7 @@ func TestJsonLog(t *testing.T) {
 		{name: "warn_level", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelWarn)}, log: "test", expected: fmt.Sprintf("{\"level\":\"ERROR\",\"time\":\"%s\",\"message\":\"test\"}\n{\"level\":\"WARN\",\"time\":\"%s\",\"message\":\"test\"}\n", now, now)},
 		{name: "info_level", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelInfo)}, log: "test", expected: fmt.Sprintf("{\"level\":\"ERROR\",\"time\":\"%s\",\"message\":\"test\"}\n{\"level\":\"WARN\",\"time\":\"%s\",\"message\":\"test\"}\n{\"level\":\"INFO\",\"time\":\"%s\",\"message\":\"test\"}\n", now, now, now)},
 		{name: "debug_level", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelDebug)}, log: "test", expected: fmt.Sprintf("{\"level\":\"ERROR\",\"time\":\"%s\",\"message\":\"test\"}\n{\"level\":\"WARN\",\"time\":\"%s\",\"message\":\"test\"}\n{\"level\":\"INFO\",\"time\":\"%s\",\"message\":\"test\"}\n{\"level\":\"DEBUG\",\"time\":\"%s\",\"message\":\"test\"}\n", now, now, now, now)},
+		{name: "debug_level_group", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelDebug)}, log: "test", expected: fmt.Sprintf("{\"level\":\"ERROR\",\"time\":\"%s\",\"message\":\"test\",\"group\":\"group\"}\n{\"level\":\"WARN\",\"time\":\"%s\",\"message\":\"test\",\"group\":\"group\"}\n{\"level\":\"INFO\",\"time\":\"%s\",\"message\":\"test\",\"group\":\"group\"}\n{\"level\":\"DEBUG\",\"time\":\"%s\",\"message\":\"test\",\"group\":\"group\"}\n", now, now, now, now)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -61,10 +71,17 @@ func TestJsonLog(t *testing.T) {
 			tt.opts = append(tt.opts, handler.WithStdOut(&stdout), handler.WithStdErr(&stdout), handler.WithJSON())
 			logger := slog.New(handler.NewHandler(tt.opts...))
 
-			logger.Error(tt.log)
-			logger.Warn(tt.log)
-			logger.Info(tt.log)
-			logger.Debug(tt.log)
+			if strings.HasSuffix(tt.name, "_group") {
+				logger.WithGroup("group").Error(tt.log)
+				logger.WithGroup("group").Warn(tt.log)
+				logger.WithGroup("group").Info(tt.log)
+				logger.WithGroup("group").Debug(tt.log)
+			} else {
+				logger.Error(tt.log)
+				logger.Warn(tt.log)
+				logger.Info(tt.log)
+				logger.Debug(tt.log)
+			}
 			assert.Equal(t, tt.expected, stdout.String())
 		})
 	}
