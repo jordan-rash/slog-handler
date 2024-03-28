@@ -68,5 +68,34 @@ func TestJsonLog(t *testing.T) {
 			assert.Equal(t, tt.expected, stdout.String())
 		})
 	}
+}
 
+func TestWithJsonOption(t *testing.T) {
+	var stdout bytes.Buffer
+	now := time.Now().Format(time.TimeOnly)
+
+	logger := slog.New(handler.NewHandler(handler.WithJSON(), handler.WithStdOut(&stdout)))
+	logger.Info("test")
+
+	assert.Equal(t, fmt.Sprintf("{\"level\":\"INFO\",\"time\":\"%s\",\"message\":\"test\"}\n", now), stdout.String())
+}
+
+func TestWithTimeFormatOption(t *testing.T) {
+	var stdout bytes.Buffer
+	now := time.Now().Format(time.RFC822)
+
+	logger := slog.New(handler.NewHandler(handler.WithTimeFormat(time.RFC822), handler.WithStdOut(&stdout)))
+	logger.Info("test")
+
+	assert.Equal(t, fmt.Sprintf("[INFO] %s - test\n", now), stdout.String())
+}
+
+func TestWithTextOutputFormatOption(t *testing.T) {
+	var stdout bytes.Buffer
+	now := time.Now().Format(time.TimeOnly)
+
+	logger := slog.New(handler.NewHandler(handler.WithTextOutputFormat("%s | %s | %s\n"), handler.WithStdOut(&stdout)))
+	logger.Info("test")
+
+	assert.Equal(t, fmt.Sprintf("INFO | %s | test\n", now), stdout.String())
 }
