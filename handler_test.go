@@ -29,7 +29,7 @@ func TestNewHandlerText(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var stdout bytes.Buffer
-			tt.opts = append(tt.opts, handler.WithStdOut(&stdout))
+			tt.opts = append(tt.opts, handler.WithStdOut(&stdout), handler.WithStdErr(&stdout))
 			logger := slog.New(handler.NewHandler(tt.opts...))
 
 			logger.Error(tt.log)
@@ -58,7 +58,7 @@ func TestJsonLog(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var stdout bytes.Buffer
-			tt.opts = append(tt.opts, handler.WithStdOut(&stdout), handler.WithJSON())
+			tt.opts = append(tt.opts, handler.WithStdOut(&stdout), handler.WithStdErr(&stdout), handler.WithJSON())
 			logger := slog.New(handler.NewHandler(tt.opts...))
 
 			logger.Error(tt.log)
@@ -98,4 +98,24 @@ func TestWithTextOutputFormatOption(t *testing.T) {
 	logger.Info("test")
 
 	assert.Equal(t, fmt.Sprintf("INFO | %s | test\n", now), stdout.String())
+}
+
+func TestLogAttr(t *testing.T) {
+	var stdout bytes.Buffer
+	now := time.Now().Format(time.TimeOnly)
+
+	logger := slog.New(handler.NewHandler(handler.WithStdErr(&stdout), handler.WithStdOut(&stdout)))
+	logger.With(slog.String("foo", "bar")).Info("test")
+
+	assert.Equal(t, fmt.Sprintf("[INFO] %s - test foo=bar\n", now), stdout.String())
+}
+
+func TestLoggerAttr(t *testing.T) {
+	var stdout bytes.Buffer
+	now := time.Now().Format(time.TimeOnly)
+
+	logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout))).With(slog.String("foo", "bar"))
+	logger.Info("test")
+
+	assert.Equal(t, fmt.Sprintf("[INFO] %s - test foo=bar\n", now), stdout.String())
 }

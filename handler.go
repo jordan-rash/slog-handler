@@ -53,16 +53,26 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 		return true
 	})
 
+	outLoc := func() io.Writer {
+		if record.Level >= slog.LevelError {
+			return n.err
+		}
+		return n.out
+	}
+
 	if !n.json {
-		if record.NumAttrs() == 0 {
-			fmt.Fprintf(n.out, n.textOutputFormat, record.Level, record.Time.Format(n.timeFormat), record.Message)
+		if len(attrs) == 0 {
+			fmt.Fprintf(outLoc(), n.textOutputFormat, record.Level, record.Time.Format(n.timeFormat), record.Message)
 		} else {
 			attsString := strings.Builder{}
-			for _, a := range attrs {
-				attsString.WriteString(a.String() + " ")
+			for i, a := range attrs {
+				attsString.WriteString(a.String())
+				if i < len(attrs)-1 {
+					attsString.WriteString(" ")
+				}
 			}
 			output := strings.TrimSpace(n.textOutputFormat) + " " + attsString.String() + "\n"
-			fmt.Fprintf(n.out, output, record.Level, record.Time.Format(n.timeFormat), record.Message)
+			fmt.Fprintf(outLoc(), output, record.Level, record.Time.Format(n.timeFormat), record.Message)
 		}
 	} else {
 		a_map := make(map[string]any)
@@ -79,7 +89,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 		}
 
 		l_raw, _ := json.Marshal(l)
-		fmt.Fprintln(n.out, string(l_raw))
+		fmt.Fprintln(outLoc(), string(l_raw))
 	}
 	return nil
 }
