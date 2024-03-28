@@ -27,11 +27,11 @@ Controls which `io.Writer` is used for error messages.
 ## Example
 
 ```go 
-logger := slog.New(handler.NewHandler(
-  handler.WithLogLevel(slog.Debug),
-  handler.WithTimeFormat(time.RFC822),
-  handler.WithTextOutputFormat("%s | %s | %s\n"),
-  handler.WithStdErr(os.Stdout),
-)
+logger = slog.New(handler.NewHandler(
+	handler.WithLogLevel(slog.LevelDebug),
+	handler.WithTimeFormat(time.RFC822),
+	handler.WithTextOutputFormat("%s | %s | %s\n"),
+	handler.WithStdErr(os.Stdout),
+))
 logger.With(slog.String("app", "myapp")).Debug("test")
 ```
