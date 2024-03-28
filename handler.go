@@ -2,7 +2,7 @@ package handler
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
@@ -42,13 +42,25 @@ func NewHandler(opts ...HandlerOption) *Handler {
 }
 
 func (n *Handler) Enabled(_ context.Context, level slog.Level) bool {
-	fmt.Printf("level enabled: %t", level >= n.level)
 	return level >= n.level
 }
 
 func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
-	fmt.Fprintf(n.out, n.textOutputFormat, record.Level, record.Time.Format(n.timeFormat), record.Message)
-	return errors.New("invalid log level")
+	if !n.json {
+		fmt.Fprintf(n.out, n.textOutputFormat, record.Level, record.Time.Format(n.timeFormat), record.Message)
+	} else {
+		l := jsonLog{
+			Level:   record.Level.String(),
+			Time:    record.Time.Format(n.timeFormat),
+			Message: record.Message,
+			Group:   n.group,
+			Attrs:   n.attrs,
+		}
+
+		l_raw, _ := json.Marshal(l)
+		fmt.Fprint(n.out, string(l_raw))
+	}
+	return nil
 }
 
 func (n *Handler) WithAttrs(attrs []slog.Attr) slog.Handler {
@@ -61,4 +73,12 @@ func (n *Handler) WithGroup(name string) slog.Handler {
 	newHandler := *n
 	newHandler.group = name
 	return &newHandler
+}
+
+type jsonLog struct {
+	Level   string      `json:"level"`
+	Time    string      `json:"time"`
+	Message string      `json:"message"`
+	Group   string      `json:"group,omitempty"`
+	Attrs   []slog.Attr `json:"attrs,omitempty"`
 }
