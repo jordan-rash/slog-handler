@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log/slog"
 	"os"
 	"time"
@@ -29,4 +30,17 @@ func main() {
 		handler.WithStdErr(os.Stdout),
 	))
 	logger.With(slog.String("app", "myapp")).Debug("test")
+
+	f, _ := os.Create("log.txt")
+	defer f.Close()
+	logger = slog.New(handler.NewHandler(
+		handler.WithLogLevel(slog.LevelDebug),
+		handler.WithStdOut(f),
+		handler.WithStdErr(f),
+	))
+	logger.Info("test info")
+	logger.Debug("test debug")
+	err := errors.New("bad error")
+	logger.Error("error", slog.Any("err", err))
+
 }
