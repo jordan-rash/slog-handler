@@ -35,3 +35,19 @@ logger = slog.New(handler.NewHandler(
 ))
 logger.With(slog.String("app", "myapp")).Debug("test")
 ```
+
+### Benchmarks if you're into that sort of thing
+
+##### Text Log Handler
+```shell
+BenchmarkTextLog/handler_text_log-20            33507366               350.1 ns/op           102 B/op          3 allocs/op
+BenchmarkTextLogStdLib/handler_text_log-20      35334312               334.1 ns/op           117 B/op          0 allocs/op
+```
+
+##### JSON Log Handler
+```shell
+BenchmarkJSONLog/handler_json_log-20            21419242               546.6 ns/op           474 B/op          6 allocs/op
+BenchmarkJSONLogStdLib/stdlib_json_log-20       38057089               340.3 ns/op           163 B/op          0 allocs/op
+```
+
+> The JSON Handler here is much slower as it uses the JSON library under the covers.  The stdlib implementation builds the string manually, so its faster.  🤷🏼‍♀️

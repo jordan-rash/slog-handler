@@ -136,3 +136,43 @@ func TestLoggerAttr(t *testing.T) {
 
 	assert.Equal(t, fmt.Sprintf("[INFO] %s - test foo=bar\n", now), stdout.String())
 }
+
+func BenchmarkTextLog(b *testing.B) {
+	var stdout bytes.Buffer
+	b.Run("handler text log", func(b *testing.B) {
+		logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout)))
+		for i := 0; i < b.N; i++ {
+			logger.Info("test")
+		}
+	})
+}
+
+func BenchmarkTextLogStdLib(b *testing.B) {
+	var stdout bytes.Buffer
+	b.Run("stdlib text log", func(b *testing.B) {
+		logger := slog.New(slog.NewTextHandler(&stdout, nil))
+		for i := 0; i < b.N; i++ {
+			logger.Info("test")
+		}
+	})
+}
+
+func BenchmarkJSONLog(b *testing.B) {
+	var stdout bytes.Buffer
+	b.Run("handler json log", func(b *testing.B) {
+		logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithJSON()))
+		for i := 0; i < b.N; i++ {
+			logger.Info("test")
+		}
+	})
+}
+
+func BenchmarkJSONLogStdLib(b *testing.B) {
+	var stdout bytes.Buffer
+	b.Run("stdlib json log", func(b *testing.B) {
+		logger := slog.New(slog.NewJSONHandler(&stdout, nil))
+		for i := 0; i < b.N; i++ {
+			logger.Info("test")
+		}
+	})
+}
