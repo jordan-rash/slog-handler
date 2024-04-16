@@ -9,6 +9,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Handler struct {
@@ -18,6 +20,12 @@ type Handler struct {
 	timeFormat       string
 	textOutputFormat string
 	level            slog.Level
+
+	color      bool
+	debugColor string
+	infoColor  string
+	warnColor  string
+	errorColor string
 
 	group string
 	attrs []slog.Attr
@@ -33,6 +41,11 @@ func NewHandler(opts ...HandlerOption) *Handler {
 		timeFormat:       time.TimeOnly,
 		textOutputFormat: "[%s] %s - %s\n",
 		level:            slog.LevelInfo,
+		color:            false,
+		debugColor:       "#FFE6FF", // Light Pink
+		infoColor:        "#6666FF", //Slate Blue
+		warnColor:        "#FFBB33", //Burnt Orange
+		errorColor:       "#E60000", //Crimson Red
 	}
 
 	for _, opt := range opts {
@@ -67,9 +80,25 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 		return n.out
 	}
 
+	var recordLevel string
+	if n.color {
+		switch record.Level {
+		case slog.LevelDebug:
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.debugColor)).Render()
+		case slog.LevelInfo:
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.infoColor)).Render()
+		case slog.LevelWarn:
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.warnColor)).Render()
+		case slog.LevelError:
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.errorColor)).Render()
+		}
+	} else {
+		recordLevel = record.Level.String()
+	}
+
 	if !n.json {
 		if len(attrs) == 0 {
-			fmt.Fprintf(outLoc(), textFormat(), record.Level, record.Time.Format(n.timeFormat), record.Message)
+			fmt.Fprintf(outLoc(), textFormat(), recordLevel, record.Time.Format(n.timeFormat), record.Message)
 		} else {
 			attsString := strings.Builder{}
 			for i, a := range attrs {
@@ -79,7 +108,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 				}
 			}
 			output := strings.TrimSpace(textFormat()) + " " + attsString.String() + "\n"
-			fmt.Fprintf(outLoc(), output, record.Level, record.Time.Format(n.timeFormat), record.Message)
+			fmt.Fprintf(outLoc(), output, recordLevel, record.Time.Format(n.timeFormat), record.Message)
 		}
 	} else {
 		a_map := make(map[string]any)

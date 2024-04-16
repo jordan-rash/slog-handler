@@ -40,3 +40,33 @@ func WithLogLevel(level slog.Level) HandlerOption {
 		h.level = level
 	}
 }
+
+func WithColor(color bool) HandlerOption {
+	return func(h *Handler) {
+		h.color = color
+	}
+}
+
+func WithDebugColor(color string) HandlerOption {
+	return func(h *Handler) {
+		h.debugColor = color
+	}
+}
+
+func WithInfoColor(color string) HandlerOption {
+	return func(h *Handler) {
+		h.infoColor = color
+	}
+}
+
+func WithWarnColor(color string) HandlerOption {
+	return func(h *Handler) {
+		h.warnColor = color
+	}
+}
+
+func WithErrorColor(color string) HandlerOption {
+	return func(h *Handler) {
+		h.errorColor = color
+	}
+}
