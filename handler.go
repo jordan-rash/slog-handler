@@ -84,13 +84,13 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 	if n.color {
 		switch record.Level {
 		case slog.LevelDebug:
-			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.debugColor)).Render()
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.debugColor)).Render(record.Level.String())
 		case slog.LevelInfo:
-			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.infoColor)).Render()
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.infoColor)).Render(record.Level.String())
 		case slog.LevelWarn:
-			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.warnColor)).Render()
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.warnColor)).Render(record.Level.String())
 		case slog.LevelError:
-			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.errorColor)).Render()
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.errorColor)).Render(record.Level.String())
 		}
 	} else {
 		recordLevel = record.Level.String()

@@ -41,9 +41,9 @@ func WithLogLevel(level slog.Level) HandlerOption {
 	}
 }
 
-func WithColor(color bool) HandlerOption {
+func WithColor() HandlerOption {
 	return func(h *Handler) {
-		h.color = color
+		h.color = true
 	}
 }
 

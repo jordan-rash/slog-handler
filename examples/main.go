@@ -16,9 +16,11 @@ func main() {
 	logger.Info("test info", slog.String("key", "value"))
 	logger.WithGroup("mygroup").Info("test info", slog.String("key", "value"))
 
-	logger = slog.New(handler.NewHandler(handler.WithLogLevel(slog.LevelDebug)))
+	logger = slog.New(handler.NewHandler(handler.WithLogLevel(slog.LevelDebug), handler.WithColor()))
 	logger.Info("test info")
 	logger.Debug("test debug")
+	logger.Warn("test info", slog.String("key", "value"))
+	logger.WithGroup("mygroup").Error("test info", slog.String("key", "value"))
 
 	logger.With(slog.String("foo", "bar")).Info("test info", slog.String("key", "value"))
 	logger.WithGroup("mygroup").Info("derp")
