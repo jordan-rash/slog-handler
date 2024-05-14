@@ -2,6 +2,7 @@ package natslogger
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -14,7 +15,9 @@ func natsServer(t testing.TB) *server.Server {
 
 	s, err := server.NewServer(
 		&server.Options{
-			Port: -1,
+			Port:  -1,
+			Debug: true,
+			Trace: true,
 		},
 	)
 	if err != nil {
@@ -65,6 +68,8 @@ func TestLogger(t *testing.T) {
 	logger := NewLogger(nc)
 	logger.Info("info")
 	logger.Error("error")
+	fmt.Fprint(os.Stdout, "foo\n")
+	fmt.Fprint(os.Stderr, "bar\n")
 
 	err = nc.Drain()
 	if err != nil {
