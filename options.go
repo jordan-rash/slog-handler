@@ -11,13 +11,13 @@ func WithJSON() HandlerOption {
 	}
 }
 
-func WithStdOut(out io.Writer) HandlerOption {
+func WithStdOut(out ...io.Writer) HandlerOption {
 	return func(h *Handler) {
 		h.out = out
 	}
 }
 
-func WithStdErr(err io.Writer) HandlerOption {
+func WithStdErr(err ...io.Writer) HandlerOption {
 	return func(h *Handler) {
 		h.err = err
 	}

@@ -2,11 +2,13 @@ module github.com/jordan-rash/slog-handler
 
 go 1.22.0
 
-require github.com/stretchr/testify v1.9.0
+require (
+	github.com/charmbracelet/lipgloss v0.10.0
+	github.com/stretchr/testify v1.9.0
+)
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
-	github.com/charmbracelet/lipgloss v0.10.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect

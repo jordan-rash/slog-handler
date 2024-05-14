@@ -15,8 +15,8 @@ import (
 
 type Handler struct {
 	json             bool
-	out              io.Writer
-	err              io.Writer
+	out              []io.Writer
+	err              []io.Writer
 	timeFormat       string
 	textOutputFormat string
 	level            slog.Level
@@ -36,8 +36,8 @@ type HandlerOption func(*Handler)
 func NewHandler(opts ...HandlerOption) *Handler {
 	nh := &Handler{
 		attrs:            []slog.Attr{},
-		out:              os.Stdout,
-		err:              os.Stderr,
+		out:              []io.Writer{os.Stdout},
+		err:              []io.Writer{os.Stderr},
 		timeFormat:       time.TimeOnly,
 		textOutputFormat: "[%s] %s - %s\n",
 		level:            slog.LevelInfo,
@@ -73,7 +73,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 		return n.textOutputFormat
 	}
 
-	outLoc := func() io.Writer {
+	outLoc := func() []io.Writer {
 		if record.Level >= slog.LevelError {
 			return n.err
 		}
@@ -98,7 +98,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 
 	if !n.json {
 		if len(attrs) == 0 {
-			fmt.Fprintf(outLoc(), textFormat(), recordLevel, record.Time.Format(n.timeFormat), record.Message)
+			printerf(outLoc(), textFormat(), recordLevel, record.Time.Format(n.timeFormat), record.Message)
 		} else {
 			attsString := strings.Builder{}
 			for i, a := range attrs {
@@ -108,7 +108,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 				}
 			}
 			output := strings.TrimSpace(textFormat()) + " " + attsString.String() + "\n"
-			fmt.Fprintf(outLoc(), output, recordLevel, record.Time.Format(n.timeFormat), record.Message)
+			printerf(outLoc(), output, recordLevel, record.Time.Format(n.timeFormat), record.Message)
 		}
 	} else {
 		a_map := make(map[string]any)
@@ -125,7 +125,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 		}
 
 		l_raw, _ := json.Marshal(l)
-		fmt.Fprintln(outLoc(), string(l_raw))
+		printer(outLoc(), string(l_raw))
 	}
 	return nil
 }
