@@ -23,6 +23,14 @@ Controls which `io.Writer` is used for non-error log messages.
 #### WithStdErr 
 Controls which `io.Writer` is used for error messages.
 
+#### WithColor
+Adds color to the log levels in text mode
+
+#### With{Debug|Info|Warn|Error}Color
+Overrides the default color for the log level.
+
+#### WithShortLevels
+Prints 3 character log levels instead of the full name.  In text mode, this helps keep the log lines visually straight.
 
 ## Example
 
