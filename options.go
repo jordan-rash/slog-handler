@@ -35,6 +35,12 @@ func WithTextOutputFormat(format string) HandlerOption {
 	}
 }
 
+func WithGroupTextOutputFormat(format string) HandlerOption {
+	return func(h *Handler) {
+		h.groupTextOutputFormat = format
+	}
+}
+
 func WithLogLevel(level slog.Level) HandlerOption {
 	return func(h *Handler) {
 		h.level = level
@@ -68,5 +74,11 @@ func WithWarnColor(color string) HandlerOption {
 func WithErrorColor(color string) HandlerOption {
 	return func(h *Handler) {
 		h.errorColor = color
+	}
+}
+
+func WithShortLevels() HandlerOption {
+	return func(h *Handler) {
+		h.shortLevels = true
 	}
 }

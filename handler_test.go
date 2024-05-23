@@ -26,6 +26,7 @@ func TestNewHandlerText(t *testing.T) {
 		{name: "warn_level", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelWarn)}, log: "test", expected: fmt.Sprintf("[ERROR] %s - test\n[WARN] %s - test\n", now, now)},
 		{name: "info_level", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelInfo)}, log: "test", expected: fmt.Sprintf("[ERROR] %s - test\n[WARN] %s - test\n[INFO] %s - test\n", now, now, now)},
 		{name: "debug_level", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelDebug)}, log: "test", expected: fmt.Sprintf("[ERROR] %s - test\n[WARN] %s - test\n[INFO] %s - test\n[DEBUG] %s - test\n", now, now, now, now)},
+		{name: "debug_level_shortlvl", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelDebug), handler.WithShortLevels()}, log: "test", expected: fmt.Sprintf("[ERR] %s - test\n[WRN] %s - test\n[INF] %s - test\n[DBG] %s - test\n", now, now, now, now)},
 		{name: "debug_level_group", opts: []handler.HandlerOption{handler.WithLogLevel(slog.LevelDebug)}, log: "test", expected: fmt.Sprintf("group | [ERROR] %s - test\ngroup | [WARN] %s - test\ngroup | [INFO] %s - test\ngroup | [DEBUG] %s - test\n", now, now, now, now)},
 	}
 	for _, tt := range tests {

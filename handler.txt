@@ -1,0 +1,7 @@
+goos: linux
+goarch: amd64
+pkg: github.com/jordan-rash/slog-handler
+cpu: 13th Gen Intel(R) Core(TM) i9-13900H
+BenchmarkTestLog/handler_text_log-20         	33056247	       353.1 ns/op	     102 B/op	       3 allocs/op
+PASS
+ok  	github.com/jordan-rash/slog-handler	12.091s

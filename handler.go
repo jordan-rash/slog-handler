@@ -14,12 +14,14 @@ import (
 )
 
 type Handler struct {
-	json             bool
-	out              []io.Writer
-	err              []io.Writer
-	timeFormat       string
-	textOutputFormat string
-	level            slog.Level
+	json                  bool
+	shortLevels           bool
+	out                   []io.Writer
+	err                   []io.Writer
+	timeFormat            string
+	textOutputFormat      string
+	groupTextOutputFormat string
+	level                 slog.Level
 
 	color      bool
 	debugColor string
@@ -35,17 +37,19 @@ type HandlerOption func(*Handler)
 
 func NewHandler(opts ...HandlerOption) *Handler {
 	nh := &Handler{
-		attrs:            []slog.Attr{},
-		out:              []io.Writer{os.Stdout},
-		err:              []io.Writer{os.Stderr},
-		timeFormat:       time.TimeOnly,
-		textOutputFormat: "[%s] %s - %s\n",
-		level:            slog.LevelInfo,
-		color:            false,
-		debugColor:       "#FFE6FF", // Light Pink
-		infoColor:        "#6666FF", //Slate Blue
-		warnColor:        "#FFBB33", //Burnt Orange
-		errorColor:       "#E60000", //Crimson Red
+		attrs:                 []slog.Attr{},
+		out:                   []io.Writer{os.Stdout},
+		err:                   []io.Writer{os.Stderr},
+		shortLevels:           false,
+		timeFormat:            time.TimeOnly,
+		textOutputFormat:      "[%s] %s - %s\n",
+		groupTextOutputFormat: "%s | %s",
+		level:                 slog.LevelInfo,
+		color:                 false,
+		debugColor:            "#FFE6FF", // Light Pink
+		infoColor:             "#6666FF", //Slate Blue
+		warnColor:             "#FFBB33", //Burnt Orange
+		errorColor:            "#E60000", //Crimson Red
 	}
 
 	for _, opt := range opts {
@@ -68,7 +72,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 
 	textFormat := func() string {
 		if n.group != "" {
-			return fmt.Sprintf("%s | %s", n.group, n.textOutputFormat)
+			return fmt.Sprintf(n.groupTextOutputFormat, n.group, n.textOutputFormat)
 		}
 		return n.textOutputFormat
 	}
@@ -80,20 +84,36 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 		return n.out
 	}
 
+	level := func() string {
+		if n.shortLevels {
+			switch record.Level {
+			case slog.LevelDebug:
+				return "DBG"
+			case slog.LevelInfo:
+				return "INF"
+			case slog.LevelWarn:
+				return "WRN"
+			case slog.LevelError:
+				return "ERR"
+			}
+		}
+		return record.Level.String()
+	}
+
 	var recordLevel string
 	if n.color {
 		switch record.Level {
 		case slog.LevelDebug:
-			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.debugColor)).Render(record.Level.String())
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.debugColor)).Render(level())
 		case slog.LevelInfo:
-			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.infoColor)).Render(record.Level.String())
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.infoColor)).Render(level())
 		case slog.LevelWarn:
-			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.warnColor)).Render(record.Level.String())
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.warnColor)).Render(level())
 		case slog.LevelError:
-			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.errorColor)).Render(record.Level.String())
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.errorColor)).Render(level())
 		}
 	} else {
-		recordLevel = record.Level.String()
+		recordLevel = level()
 	}
 
 	if !n.json {
@@ -117,7 +137,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 		}
 
 		l := jsonLog{
-			Level:   record.Level.String(),
+			Level:   level(),
 			Time:    record.Time.Format(n.timeFormat),
 			Message: record.Message,
 			Group:   n.group,
