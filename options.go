@@ -29,6 +29,18 @@ func WithTimeFormat(format string) HandlerOption {
 	}
 }
 
+// WithTextOutputFormat sets the format for the group output.
+// The order of the fields are:
+// 1. Record Level (Debug, Info, Warn, Error)
+// 2. Record Time
+// 3. Record Message
+//
+// The default format is "[%s] %s - %s\n".
+// If you want to rearrange the fields, you can use the indexes:
+// "$[3]s %[1]s %[2]\n"
+// This will output "{Record Message} {Record Level} {Record Time}\n"
+//
+// User must provide newline in format
 func WithTextOutputFormat(format string) HandlerOption {
 	return func(h *Handler) {
 		h.textOutputFormat = format

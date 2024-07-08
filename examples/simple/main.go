@@ -45,4 +45,8 @@ func main() {
 	err := errors.New("bad error")
 	logger.Error("error", slog.Any("err", err))
 
+	logger = slog.New(handler.NewHandler(
+		handler.WithTextOutputFormat("%[3]s %[2]s %[1]s\n"),
+	))
+	logger.Info("flipped outout")
 }
