@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"os"
@@ -49,4 +50,12 @@ func main() {
 		handler.WithTextOutputFormat("%[3]s %[2]s %[1]s\n"),
 	))
 	logger.Info("flipped outout")
+
+	logger = slog.New(handler.NewHandler(
+		handler.WithLogLevel(handler.LevelTrace),
+		handler.WithShortLevels(),
+		handler.WithColor(),
+	))
+	logger.Info("testing trace next")
+	logger.Log(context.Background(), handler.LevelTrace, "i am trace")
 }

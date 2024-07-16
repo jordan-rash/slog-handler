@@ -24,6 +24,7 @@ type Handler struct {
 	level                 slog.Level
 
 	color      bool
+	traceColor string
 	debugColor string
 	infoColor  string
 	warnColor  string
@@ -46,10 +47,11 @@ func NewHandler(opts ...HandlerOption) *Handler {
 		groupTextOutputFormat: "%s | %s",
 		level:                 slog.LevelInfo,
 		color:                 false,
+		traceColor:            "#C0C0C0", // Gray
 		debugColor:            "#FFE6FF", // Light Pink
-		infoColor:             "#6666FF", //Slate Blue
-		warnColor:             "#FFBB33", //Burnt Orange
-		errorColor:            "#E60000", //Crimson Red
+		infoColor:             "#6666FF", // Slate Blue
+		warnColor:             "#FFBB33", // Burnt Orange
+		errorColor:            "#E60000", // Crimson Red
 	}
 
 	for _, opt := range opts {
@@ -87,6 +89,8 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 	level := func() string {
 		if n.shortLevels {
 			switch record.Level {
+			case LevelTrace:
+				return "TRC"
 			case slog.LevelDebug:
 				return "DBG"
 			case slog.LevelInfo:
@@ -103,6 +107,8 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 	var recordLevel string
 	if n.color {
 		switch record.Level {
+		case LevelTrace:
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.traceColor)).Render(level())
 		case slog.LevelDebug:
 			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.debugColor)).Render(level())
 		case slog.LevelInfo:
