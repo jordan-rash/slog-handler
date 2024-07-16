@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -138,42 +139,41 @@ func TestLoggerAttr(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("[INFO] %s - test foo=bar\n", now), stdout.String())
 }
 
-func BenchmarkTextLog(b *testing.B) {
+func TestTraceLevel(t *testing.T) {
 	var stdout bytes.Buffer
-	b.Run("handler text log", func(b *testing.B) {
-		logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout)))
-		for i := 0; i < b.N; i++ {
-			logger.Info("test")
-		}
-	})
+	now := time.Now().Format(time.TimeOnly)
+
+	logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithLogLevel(handler.LevelTrace)))
+	logger.Log(context.TODO(), handler.LevelTrace, "test")
+
+	assert.Equal(t, fmt.Sprintf("[DEBUG-2] %s - test\n", now), stdout.String())
+
+	stdout = bytes.Buffer{}
+	logger = slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithLogLevel(handler.LevelTrace), handler.WithShortLevels()))
+	logger.Log(context.TODO(), handler.LevelTrace, "test")
+
+	assert.Equal(t, fmt.Sprintf("[TRC] %s - test\n", now), stdout.String())
 }
 
-func BenchmarkTextLogStdLib(b *testing.B) {
+func BenchmarkHandlers(b *testing.B) {
 	var stdout bytes.Buffer
-	b.Run("stdlib text log", func(b *testing.B) {
-		logger := slog.New(slog.NewTextHandler(&stdout, nil))
-		for i := 0; i < b.N; i++ {
-			logger.Info("test")
-		}
-	})
-}
+	bt := []struct {
+		Name    string
+		Handler slog.Handler
+	}{
+		{"handler text log", handler.NewHandler(handler.WithStdOut(&stdout))},
+		{"stdlib text log", slog.NewTextHandler(&stdout, nil)},
+		{"handler json log", handler.NewHandler(handler.WithStdOut(&stdout), handler.WithJSON())},
+		{"stdlib json log", slog.NewJSONHandler(&stdout, nil)},
+	}
 
-func BenchmarkJSONLog(b *testing.B) {
-	var stdout bytes.Buffer
-	b.Run("handler json log", func(b *testing.B) {
-		logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithJSON()))
-		for i := 0; i < b.N; i++ {
-			logger.Info("test")
-		}
-	})
-}
-
-func BenchmarkJSONLogStdLib(b *testing.B) {
-	var stdout bytes.Buffer
-	b.Run("stdlib json log", func(b *testing.B) {
-		logger := slog.New(slog.NewJSONHandler(&stdout, nil))
-		for i := 0; i < b.N; i++ {
-			logger.Info("test")
-		}
-	})
+	for _, t := range bt {
+		b.Run(t.Name, func(b *testing.B) {
+			logger := slog.New(t.Handler)
+			for i := 0; i < b.N; i++ {
+				logger.Info("test")
+			}
+		})
+		stdout = bytes.Buffer{}
+	}
 }

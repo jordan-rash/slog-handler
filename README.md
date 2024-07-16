@@ -32,6 +32,15 @@ Overrides the default color for the log level.
 #### WithShortLevels
 Prints 3 character log levels instead of the full name.  In text mode, this helps keep the log lines visually straight.
 
+#### Trace Log Level
+Library includes an easier way to log trace messages.  This is useful for debugging.
+```go
+logger = slog.New(handler.NewHandler(
+	handler.WithLogLevel(handler.LevelTrace),
+))
+logger.Log(context.Background(), handler.LevelTrace, "trace test")
+```
+
 ## Example
 
 ```go 
