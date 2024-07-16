@@ -100,6 +100,11 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 			case slog.LevelError:
 				return "ERR"
 			}
+		} else {
+			switch record.Level {
+			case LevelTrace:
+				return "TRACE"
+			}
 		}
 		return record.Level.String()
 	}

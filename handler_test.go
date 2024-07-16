@@ -146,7 +146,7 @@ func TestTraceLevel(t *testing.T) {
 	logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithLogLevel(handler.LevelTrace)))
 	logger.Log(context.TODO(), handler.LevelTrace, "test")
 
-	assert.Equal(t, fmt.Sprintf("[DEBUG-2] %s - test\n", now), stdout.String())
+	assert.Equal(t, fmt.Sprintf("[TRACE] %s - test\n", now), stdout.String())
 
 	stdout = bytes.Buffer{}
 	logger = slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithLogLevel(handler.LevelTrace), handler.WithShortLevels()))
