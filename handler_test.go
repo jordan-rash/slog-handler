@@ -139,6 +139,16 @@ func TestLoggerAttr(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("[INFO] %s - test foo=bar\n", now), stdout.String())
 }
 
+func TestGroupWithNewFormat(t *testing.T) {
+	var stdout bytes.Buffer
+	now := time.Now().Format(time.TimeOnly)
+
+	logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithTextOutputFormat("[%s] %s - %s"), handler.WithGroupTextOutputFormat("%[2]s <> %[1]s\n"))).WithGroup("mygroup")
+	logger.Info("test")
+
+	assert.Equal(t, fmt.Sprintf("[INFO] %s - test <> mygroup\n", now), stdout.String())
+}
+
 func TestTraceLevel(t *testing.T) {
 	var stdout bytes.Buffer
 	now := time.Now().Format(time.TimeOnly)
