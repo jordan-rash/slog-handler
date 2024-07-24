@@ -1,4 +1,4 @@
-module github.com/jordan-rash/slog-handler
+module disorder.dev/shandler
 
 go 1.22.0
 

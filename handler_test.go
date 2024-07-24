@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	handler "github.com/jordan-rash/slog-handler"
+	handler "disorder.dev/shandler"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/jordan-rash/slog-handler"
+	"disorder.dev/shandler"
 	"github.com/nats-io/nats.go"
 )
 

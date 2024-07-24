@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	handler "github.com/jordan-rash/slog-handler"
+	handler "disorder.dev/shandler"
 )
 
 func main() {
