@@ -59,14 +59,14 @@ logger = slog.New(handler.NewHandler(
 logger.With(slog.String("app", "myapp")).Debug("test")
 ```
 
-### Benchmarks if you're into that sort of thing
+## Benchmarks if you're into that sort of thing
 
 ```shell
 goos: linux
 goarch: amd64
 pkg: disorder.dev/shandler
-
 cpu: 13th Gen Intel(R) Core(TM) i9-13900H
+
 BenchmarkHandlers/handler_text_log-20            3211198               351.4 ns/op
 BenchmarkHandlers/stdlib_text_log-20             3325005               356.1 ns/op
 BenchmarkHandlers/handler_json_log-20            2108128               592.3 ns/op
