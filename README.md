@@ -1,12 +1,13 @@
 # SLOG Handler with more knobs
 
+As great as `log/slog` is, the provided handlers don't have enough customization knobs.  This tries to 
+provide more flexibility to the user.
+
+
 ## Installation
 ```shell
 go get disorder.dev/shandler
 ```
-
-As great as `log/slog` is, the provided handlers don't have enough customization knobs.  This tries to 
-provide more flexibility to the user.
 
 ## Features
 
