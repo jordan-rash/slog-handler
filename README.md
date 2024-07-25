@@ -38,25 +38,25 @@ Overrides the default color for the log level.
 #### WithShortLevels
 Prints 3 character log levels instead of the full name.  In text mode, this helps keep the log lines visually straight.
 
-#### Trace Log Level
-Library includes an easier way to log trace messages.  This is useful for debugging.
-```go
-logger = slog.New(handler.NewHandler(
-	handler.WithLogLevel(handler.LevelTrace),
-))
-logger.Log(context.Background(), handler.LevelTrace, "trace test")
-```
-
-## Example
+## Examples
 
 ```go 
-logger = slog.New(handler.NewHandler(
-	handler.WithLogLevel(slog.LevelDebug),
-	handler.WithTimeFormat(time.RFC822),
-	handler.WithTextOutputFormat("%s | %s | %s\n"),
-	handler.WithStdErr(os.Stdout),
+logger = slog.New(shandler.NewHandler(
+	shandler.WithLogLevel(slog.LevelDebug),
+	shandler.WithTimeFormat(time.RFC822),
+	shandler.WithTextOutputFormat("%s | %s | %s\n"),
+	shandler.WithStdErr(os.Stdout),
 ))
 logger.With(slog.String("app", "myapp")).Debug("test")
+```
+
+#### Trace Log Level
+Library includes an easier way to log trace messages.  This is useful for debugging chatty logs.
+```go
+logger = slog.New(shandler.NewHandler(
+	shandler.WithLogLevel(shandler.LevelTrace),
+))
+logger.Log(context.Background(), shandler.LevelTrace, "trace test")
 ```
 
 ## Benchmarks if you're into that sort of thing
