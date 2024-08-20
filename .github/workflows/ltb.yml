@@ -55,7 +55,7 @@ jobs:
       name: Run test suite
       run: |
         go test $(go list ./...)
-        go test -cover -coverprofile=coverage.txt $(go list ./...)
+        go test -cover -coverprofile=coverage.txt $(go list ./... | grep -v txt)
     - 
       name: Archive code coverage results
       if: runner.os == 'Linux'
