@@ -1,3 +1,8 @@
+[![Lint | Test](https://github.com/jordan-rash/slog-handler/actions/workflows/ltb.yml/badge.svg)](https://github.com/jordan-rash/slog-handler/actions/workflows/ltb.yml)
+[![Dependabot Updates](https://github.com/jordan-rash/slog-handler/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/jordan-rash/slog-handler/actions/workflows/dependabot/dependabot-updates)
+[![CodeQL](https://github.com/jordan-rash/slog-handler/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/jordan-rash/slog-handler/actions/workflows/github-code-scanning/codeql)
+[![Go Report Card](https://goreportcard.com/badge/disorder.dev/shandler)](https://goreportcard.com/report/disorder.dev/shandler)
+
 # SLOG Handler with more knobs
 
 As great as `log/slog` is, the provided handlers don't have enough customization knobs.  This tries to 
