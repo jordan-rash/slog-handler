@@ -1,6 +1,6 @@
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
-name: Lint | Test 
+name: Lint | Test
 
 on:
   pull_request:
@@ -10,10 +10,11 @@ env:
   GO_VER: '1.22.4'
 
 permissions:
-  # Required: allow read access to the content for analysis.
-  contents: read
-  # Optional: allow write access to checks to allow the action to annotate code in the PR.
-  checks: write
+  
+  contents:      read  # allow read access to the content for analysis.
+  checks:        write # allow write access to checks to allow the action to annotate code in the PR.
+  actions:       read  # to download code coverage results from "test" job
+  pull-requests: write # write permission needed to comment on PR
 
 jobs:
   lint:
@@ -54,3 +55,22 @@ jobs:
       name: Run test suite
       run: |
         go test $(go list ./...)
+        go test -cover -coverprofile=coverage.txt $(go list ./...)
+    - 
+      name: Archive code coverage results
+      if: runner.os == 'Linux'
+      uses: actions/upload-artifact@v4
+      with:
+        name: code-coverage
+        path: coverage.txt
+        
+  code_coverage:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+    -  
+      name: Go Code Coverage
+      uses: fgrosse/go-coverage-report@v1.0.2
+      with:
+        coverage-artifact-name: "code-coverage"
+        coverage-file-name: "coverage.txt" 
