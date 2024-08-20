@@ -4,7 +4,11 @@ name: Lint | Test
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: 
+      - "main"
+  push:
+    branches:
+      - 'main'
 
 env:
   GO_VER: '1.22.4'
@@ -71,6 +75,7 @@ jobs:
   code_coverage:
     runs-on: ubuntu-latest
     needs: test
+    if: github.event_name == 'pull_request'
     steps:
     -  
       name: Go Code Coverage
