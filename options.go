@@ -65,6 +65,12 @@ func WithColor() HandlerOption {
 	}
 }
 
+func WithTraceColor(color string) HandlerOption {
+	return func(h *Handler) {
+		h.traceColor = color
+	}
+}
+
 func WithDebugColor(color string) HandlerOption {
 	return func(h *Handler) {
 		h.debugColor = color
@@ -86,6 +92,12 @@ func WithWarnColor(color string) HandlerOption {
 func WithErrorColor(color string) HandlerOption {
 	return func(h *Handler) {
 		h.errorColor = color
+	}
+}
+
+func WithFatalColor(color string) HandlerOption {
+	return func(h *Handler) {
+		h.fatalColor = color
 	}
 }
 

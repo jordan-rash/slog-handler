@@ -29,6 +29,7 @@ type Handler struct {
 	infoColor  string
 	warnColor  string
 	errorColor string
+	fatalColor string
 
 	group string
 	attrs []slog.Attr
@@ -52,6 +53,7 @@ func NewHandler(opts ...HandlerOption) *Handler {
 		infoColor:             "#6666FF", // Slate Blue
 		warnColor:             "#FFBB33", // Burnt Orange
 		errorColor:            "#E60000", // Crimson Red
+		fatalColor:            "#990000", // Dark Red
 	}
 
 	for _, opt := range opts {
@@ -99,11 +101,15 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 				return "WRN"
 			case slog.LevelError:
 				return "ERR"
+			case LevelFatal:
+				return "FTL"
 			}
 		} else {
 			switch record.Level {
 			case LevelTrace:
 				return "TRACE"
+			case LevelFatal:
+				return "FATAL"
 			}
 		}
 		return record.Level.String()
@@ -122,6 +128,8 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.warnColor)).Render(level())
 		case slog.LevelError:
 			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.errorColor)).Render(level())
+		case LevelFatal:
+			recordLevel = lipgloss.NewStyle().Foreground(lipgloss.Color(n.fatalColor)).Render(level())
 		}
 	} else {
 		recordLevel = level()
