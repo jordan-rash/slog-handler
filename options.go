@@ -37,7 +37,7 @@ func WithTimeFormat(format string) HandlerOption {
 //
 // The default format is "[%s] %s - %s\n".
 // If you want to rearrange the fields, you can use the indexes:
-// "$[3]s %[1]s %[2]\n"
+// "%[3]s %[1]s %[2]\n"
 // This will output "{Record Message} {Record Level} {Record Time}\n"
 //
 // User must provide newline in format
