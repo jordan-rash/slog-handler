@@ -58,4 +58,12 @@ func main() {
 	))
 	logger.Info("testing trace next")
 	logger.Log(context.Background(), handler.LevelTrace, "i am trace")
+
+	logger = slog.New(handler.NewHandler(
+		handler.WithLogLevel(slog.LevelError),
+		handler.WithShortLevels(),
+		handler.WithColor(),
+	))
+	logger.Error("error")
+	logger.Log(context.Background(), handler.LevelFatal, "fatal")
 }

@@ -165,6 +165,22 @@ func TestTraceLevel(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("[TRC] %s - test\n", now), stdout.String())
 }
 
+func TestFatalLevel(t *testing.T) {
+	var stderr bytes.Buffer
+	now := time.Now().Format(time.TimeOnly)
+
+	logger := slog.New(handler.NewHandler(handler.WithStdErr(&stderr), handler.WithLogLevel(handler.LevelFatal)))
+	logger.Log(context.TODO(), handler.LevelFatal, "test")
+
+	assert.Equal(t, fmt.Sprintf("[FATAL] %s - test\n", now), stderr.String())
+
+	stderr = bytes.Buffer{}
+	logger = slog.New(handler.NewHandler(handler.WithStdErr(&stderr), handler.WithLogLevel(handler.LevelFatal), handler.WithShortLevels()))
+	logger.Log(context.TODO(), handler.LevelFatal, "test")
+
+	assert.Equal(t, fmt.Sprintf("[FTL] %s - test\n", now), stderr.String())
+}
+
 func BenchmarkHandlers(b *testing.B) {
 	var stdout bytes.Buffer
 	bt := []struct {
