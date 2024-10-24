@@ -106,3 +106,10 @@ func WithShortLevels() HandlerOption {
 		h.shortLevels = true
 	}
 }
+
+// You can use this to filter out logs from specific groups
+func WithGroupFilter(filter []string) HandlerOption {
+	return func(h *Handler) {
+		h.groupFilter = filter
+	}
+}

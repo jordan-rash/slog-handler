@@ -181,6 +181,18 @@ func TestFatalLevel(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("[FTL] %s - test\n", now), stderr.String())
 }
 
+func TestGroupFilter(t *testing.T) {
+	var stdout bytes.Buffer
+	now := time.Now().Format(time.TimeOnly)
+	logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithGroupFilter([]string{"group"})))
+	logger.Info("line 1")
+	logger = logger.WithGroup("group")
+	logger.Info("line 2")
+	logger = logger.WithGroup("foo")
+	logger.Info("line 3")
+	assert.Equal(t, fmt.Sprintf("[INFO] %s - line 1\nfoo | [INFO] %s - line 3\n", now, now), stdout.String())
+}
+
 func BenchmarkHandlers(b *testing.B) {
 	var stdout bytes.Buffer
 	bt := []struct {

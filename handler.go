@@ -7,6 +7,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -31,8 +32,9 @@ type Handler struct {
 	errorColor string
 	fatalColor string
 
-	group string
-	attrs []slog.Attr
+	group       string
+	groupFilter []string
+	attrs       []slog.Attr
 }
 
 type HandlerOption func(*Handler)
@@ -46,6 +48,7 @@ func NewHandler(opts ...HandlerOption) *Handler {
 		timeFormat:            time.TimeOnly,
 		textOutputFormat:      "[%s] %s - %s\n",
 		groupTextOutputFormat: "%s | %s",
+		groupFilter:           []string{},
 		level:                 slog.LevelInfo,
 		color:                 false,
 		traceColor:            "#C0C0C0", // Gray
@@ -68,6 +71,10 @@ func (n *Handler) Enabled(_ context.Context, level slog.Level) bool {
 }
 
 func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
+	if slices.Contains(n.groupFilter, n.group) {
+		return nil
+	}
+
 	attrs := n.attrs
 	record.Attrs(func(attr slog.Attr) bool {
 		attrs = append(attrs, attr)
