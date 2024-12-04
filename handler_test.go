@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"strings"
 	"testing"
@@ -191,6 +192,19 @@ func TestGroupFilter(t *testing.T) {
 	logger = logger.WithGroup("foo")
 	logger.Info("line 3")
 	assert.Equal(t, fmt.Sprintf("[INFO] %s - line 1\nfoo | [INFO] %s - line 3\n", now, now), stdout.String())
+}
+
+func TestFromConfig(t *testing.T) {
+	var stdout bytes.Buffer
+	now := time.Now().Format(time.TimeOnly)
+	logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout))).WithGroup("copyme").With(slog.String("foo", "bar"))
+	logger_config, err := handler.ToConfig(logger.Handler())
+	assert.Nil(t, err)
+
+	config_logger, err := handler.NewHandlerFromConfig(logger_config, []io.Writer{&stdout}, nil)
+	assert.Nil(t, err)
+	slog.New(config_logger).Info("test")
+	assert.Equal(t, fmt.Sprintf("copyme | [INFO] %s - test foo=bar\n", now), stdout.String())
 }
 
 func BenchmarkHandlers(b *testing.B) {
