@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -64,6 +65,21 @@ func NewHandler(opts ...HandlerOption) *Handler {
 	}
 
 	return nh
+}
+
+// NewHandlerFromConfig will allow you to pass in the settings to
+// slog.New(NewHandlerFromConfig). You will need to inclused the io.Writers
+// in the NewHandlerFromConfig call as they are not serializable.
+// Use ToConfig to get the config of your original Handler
+func NewHandlerFromConfig(config []byte, stdout, stderr []io.Writer) (*Handler, error) {
+	nh := new(Handler)
+	if err := json.Unmarshal(config, nh); err != nil {
+		return nil, err
+	}
+
+	nh.out = stdout
+	nh.err = stderr
+	return nh, nil
 }
 
 func (n *Handler) Enabled(_ context.Context, level slog.Level) bool {
@@ -186,6 +202,125 @@ func (n *Handler) WithGroup(name string) slog.Handler {
 	newHandler := *n
 	newHandler.group = name
 	return &newHandler
+}
+
+func ToConfig(h slog.Handler) ([]byte, error) {
+	n, ok := (h).(*Handler)
+	if !ok {
+		return nil, fmt.Errorf("not a shandler")
+	}
+	return json.Marshal(n)
+}
+
+type attrValue struct {
+	Kind  slog.Kind `json:"kind"`
+	Value string    `json:"value"`
+}
+
+func (n Handler) MarshalJSON() ([]byte, error) {
+	a := map[string]attrValue{}
+	for _, aT := range n.attrs {
+		a[aT.Key] = attrValue{Kind: aT.Value.Kind(), Value: aT.Value.String()}
+	}
+
+	return json.Marshal(map[string]interface{}{
+		"json":                     n.json,
+		"short_levels":             n.shortLevels,
+		"time_format":              n.timeFormat,
+		"text_output_format":       n.textOutputFormat,
+		"group_text_output_format": n.groupTextOutputFormat,
+		"level":                    n.level,
+		"color":                    n.color,
+		"trace_color":              n.traceColor,
+		"debug_color":              n.debugColor,
+		"info_color":               n.infoColor,
+		"warn_color":               n.warnColor,
+		"error_color":              n.errorColor,
+		"fatal_color":              n.fatalColor,
+		"group":                    n.group,
+		"group_filter":             n.groupFilter,
+		"attrs":                    a,
+	})
+}
+
+func (n *Handler) UnmarshalJSON(data []byte) error {
+	temp := struct {
+		Json                  bool                 `json:"json"`
+		ShortLevels           bool                 `json:"short_levels"`
+		TimeFormat            string               `json:"time_format"`
+		TextOutputFormat      string               `json:"text_output_format"`
+		GroupTextOutputFormat string               `json:"group_text_output_format"`
+		Level                 slog.Level           `json:"level"`
+		Color                 bool                 `json:"color"`
+		TraceColor            string               `json:"trace_color"`
+		DebugColor            string               `json:"debug_color"`
+		InfoColor             string               `json:"info_color"`
+		WarnColor             string               `json:"warn_color"`
+		ErrorColor            string               `json:"error_color"`
+		FatalColor            string               `json:"fatal_color"`
+		Group                 string               `json:"group"`
+		GroupFilter           []string             `json:"group_filter"`
+		Attrs                 map[string]attrValue `json:"attrs"`
+	}{}
+
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+
+	n.json = temp.Json
+	n.shortLevels = temp.ShortLevels
+	n.timeFormat = temp.TimeFormat
+	n.textOutputFormat = temp.TextOutputFormat
+	n.groupTextOutputFormat = temp.GroupTextOutputFormat
+	n.level = temp.Level
+	n.color = temp.Color
+	n.traceColor = temp.TraceColor
+	n.debugColor = temp.DebugColor
+	n.infoColor = temp.InfoColor
+	n.warnColor = temp.WarnColor
+	n.errorColor = temp.ErrorColor
+	n.fatalColor = temp.FatalColor
+	n.group = temp.Group
+	n.groupFilter = temp.GroupFilter
+
+	for k, v := range temp.Attrs {
+		switch v.Kind {
+		case slog.KindAny:
+			n.attrs = append(n.attrs, slog.Any(k, v.Value))
+		case slog.KindBool:
+			n.attrs = append(n.attrs, slog.Bool(k, v.Value == "true"))
+		case slog.KindDuration:
+			d, _ := time.ParseDuration(v.Value)
+			n.attrs = append(n.attrs, slog.Duration(k, d))
+		case slog.KindFloat64:
+			num, err := strconv.ParseFloat(v.Value, 64)
+			if err != nil {
+				return err
+			}
+			n.attrs = append(n.attrs, slog.Float64(k, num))
+		case slog.KindInt64:
+			num, err := strconv.ParseInt(v.Value, 10, 64)
+			if err != nil {
+				return err
+			}
+			n.attrs = append(n.attrs, slog.Int64(k, num))
+		case slog.KindString:
+			n.attrs = append(n.attrs, slog.String(k, v.Value))
+		case slog.KindTime:
+			t, err := time.Parse(n.timeFormat, v.Value)
+			if err != nil {
+				return err
+			}
+			n.attrs = append(n.attrs, slog.Time(k, t))
+		case slog.KindUint64:
+			num, err := strconv.ParseUint(v.Value, 10, 64)
+			if err != nil {
+				return err
+			}
+			n.attrs = append(n.attrs, slog.Uint64(k, num))
+		}
+	}
+	return nil
 }
 
 type jsonLog struct {
