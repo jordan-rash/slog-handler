@@ -11,8 +11,12 @@ func printer(src []io.Writer, data ...any) {
 	}
 }
 
-func printerf(src []io.Writer, format string, data ...any) {
+func printerf(src []io.Writer, pid string, format string, data ...any) {
 	for _, s := range src {
-		fmt.Fprintf(s, format, data...)
+		if pid == "" {
+			fmt.Fprintf(s, format, data...)
+		} else {
+			fmt.Fprintf(s, "["+pid+"] "+format, data...)
+		}
 	}
 }

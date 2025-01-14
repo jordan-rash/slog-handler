@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -203,8 +204,17 @@ func TestFromConfig(t *testing.T) {
 
 	config_logger, err := handler.NewHandlerFromConfig(logger_config, []io.Writer{&stdout}, nil)
 	assert.Nil(t, err)
+
 	slog.New(config_logger).Info("test")
 	assert.Equal(t, fmt.Sprintf("copyme | [INFO] %s - test foo=bar\n", now), stdout.String())
+}
+
+func TestLogWithPid(t *testing.T) {
+	var stdout bytes.Buffer
+	now := time.Now().Format(time.TimeOnly)
+	logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithPid()))
+	logger.Info("test")
+	assert.Equal(t, fmt.Sprintf("[%d] [INFO] %s - test\n", os.Getpid(), now), stdout.String())
 }
 
 func BenchmarkHandlers(b *testing.B) {

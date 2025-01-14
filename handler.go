@@ -17,6 +17,7 @@ import (
 
 type Handler struct {
 	json                  bool
+	pid                   bool
 	shortLevels           bool
 	out                   []io.Writer
 	err                   []io.Writer
@@ -42,6 +43,7 @@ type HandlerOption func(*Handler)
 
 func NewHandler(opts ...HandlerOption) *Handler {
 	nh := &Handler{
+		pid:                   false,
 		attrs:                 []slog.Attr{},
 		out:                   []io.Writer{os.Stdout},
 		err:                   []io.Writer{os.Stderr},
@@ -158,9 +160,14 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 		recordLevel = level()
 	}
 
+	var pid string
+	if n.pid {
+		pid = strconv.Itoa(os.Getpid())
+	}
+
 	if !n.json {
 		if len(attrs) == 0 {
-			printerf(outLoc(), textFormat(), recordLevel, record.Time.Format(n.timeFormat), record.Message)
+			printerf(outLoc(), pid, textFormat(), recordLevel, record.Time.Format(n.timeFormat), record.Message)
 		} else {
 			attsString := strings.Builder{}
 			for i, a := range attrs {
@@ -170,7 +177,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 				}
 			}
 			output := strings.TrimSpace(textFormat()) + " " + attsString.String() + "\n"
-			printerf(outLoc(), output, recordLevel, record.Time.Format(n.timeFormat), record.Message)
+			printerf(outLoc(), pid, output, recordLevel, record.Time.Format(n.timeFormat), record.Message)
 		}
 	} else {
 		a_map := make(map[string]any)
@@ -184,6 +191,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 			Message: record.Message,
 			Group:   n.group,
 			Attrs:   a_map,
+			Pid:     pid,
 		}
 
 		l_raw, _ := json.Marshal(l)
@@ -329,4 +337,5 @@ type jsonLog struct {
 	Message string         `json:"message"`
 	Group   string         `json:"group,omitempty"`
 	Attrs   map[string]any `json:"attrs,omitempty"`
+	Pid     string         `json:"pid,omitempty"`
 }
