@@ -11,6 +11,12 @@ func WithJSON() HandlerOption {
 	}
 }
 
+func WithPid() HandlerOption {
+	return func(h *Handler) {
+		h.pid = true
+	}
+}
+
 func WithStdOut(out ...io.Writer) HandlerOption {
 	return func(h *Handler) {
 		h.out = out

@@ -11,13 +11,13 @@ import (
 )
 
 func main() {
-	logger := slog.New(handler.NewHandler(handler.WithJSON()))
+	logger := slog.New(handler.NewHandler(handler.WithJSON(), handler.WithPid()))
 	logger.Info("test info")
 	logger.Debug("test debug")
 	logger.Info("test info", slog.String("key", "value"))
 	logger.WithGroup("mygroup").Info("test info", slog.String("key", "value"))
 
-	logger = slog.New(handler.NewHandler(handler.WithLogLevel(slog.LevelDebug), handler.WithColor()))
+	logger = slog.New(handler.NewHandler(handler.WithLogLevel(slog.LevelDebug), handler.WithColor(), handler.WithPid()))
 	logger.Info("test info")
 	logger.Debug("test debug")
 	logger.Warn("test info", slog.String("key", "value"))
@@ -66,4 +66,10 @@ func main() {
 	))
 	logger.Error("error")
 	logger.Log(context.Background(), handler.LevelFatal, "fatal")
+
+	logger = slog.New(handler.NewHandler(
+		handler.WithLogLevel(slog.LevelError),
+		handler.WithPid(),
+	))
+	logger.Error("error")
 }
