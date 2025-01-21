@@ -217,6 +217,14 @@ func TestLogWithPid(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("[%d] [INFO] %s - test\n", os.Getpid(), now), stdout.String())
 }
 
+func TestRightJustifyGroup(t *testing.T) {
+	var stdout bytes.Buffer
+	now := time.Now().Format(time.TimeOnly)
+	logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithGroupRightJustify()))
+	logger.WithGroup("group").Info("test")
+	assert.Equal(t, fmt.Sprintf("[INFO] %s - test%*s\n", now, 80-22, "group"), stdout.String()) // 22 is the length of message
+}
+
 func BenchmarkHandlers(b *testing.B) {
 	var stdout bytes.Buffer
 	bt := []struct {
