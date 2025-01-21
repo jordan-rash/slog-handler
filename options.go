@@ -59,6 +59,16 @@ func WithGroupTextOutputFormat(format string) HandlerOption {
 	}
 }
 
+// WithGroupRightJustify will right justify the group name if set
+// If there is an error calculating the width, it will default to 80
+//
+// Will override WithGroupTextOutputFormat setting if set
+func WithGroupRightJustify() HandlerOption {
+	return func(h *Handler) {
+		h.groupRightJustify = true
+	}
+}
+
 func WithLogLevel(level slog.Level) HandlerOption {
 	return func(h *Handler) {
 		h.level = level
