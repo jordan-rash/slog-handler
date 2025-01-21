@@ -90,4 +90,5 @@ func main() {
 	))
 	logger.Info("test1")
 	logger.WithGroup("mygroup").Info("test2")
+	logger.WithGroup("derp").Info("this is a long long long long long long message 1234567890")
 }

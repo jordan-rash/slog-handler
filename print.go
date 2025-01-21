@@ -3,10 +3,7 @@ package shandler
 import (
 	"fmt"
 	"io"
-	"os"
 	"strings"
-
-	"golang.org/x/term"
 )
 
 func printer(src []io.Writer, data ...any) {
@@ -26,10 +23,6 @@ func printerf(src []io.Writer, pid string, format string, data ...any) {
 }
 
 func printerrj(src []io.Writer, g, pid, format string, data ...any) {
-	width, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		width = 80
-	}
 	var left string
 	if pid == "" {
 		left = fmt.Sprintf(strings.TrimSpace(format), data...)

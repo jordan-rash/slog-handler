@@ -13,7 +13,19 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"golang.org/x/term"
 )
+
+var width int = 0
+
+func init() {
+	w, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		width = 80
+		return
+	}
+	width = w - 1
+}
 
 type Handler struct {
 	json                  bool
