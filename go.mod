@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/stretchr/testify v1.10.0
+	golang.org/x/term v0.29.0
 )
 
 require (

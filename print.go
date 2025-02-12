@@ -3,6 +3,7 @@ package shandler
 import (
 	"fmt"
 	"io"
+	"strings"
 )
 
 func printer(src []io.Writer, data ...any) {
@@ -18,5 +19,23 @@ func printerf(src []io.Writer, pid string, format string, data ...any) {
 		} else {
 			fmt.Fprintf(s, "["+pid+"] "+format, data...)
 		}
+	}
+}
+
+func printerrj(src []io.Writer, g, pid, format string, data ...any) {
+	var left string
+	if pid == "" {
+		left = fmt.Sprintf(strings.TrimSpace(format), data...)
+	} else {
+		left = fmt.Sprintf("["+pid+"] "+strings.TrimSpace(format), data...)
+	}
+
+	rightWidth := width - len(left)
+	if rightWidth < 0 {
+		rightWidth = 0
+	}
+
+	for _, s := range src {
+		fmt.Fprintf(s, "%s%*s\n", strings.TrimSpace(left), rightWidth, g)
 	}
 }

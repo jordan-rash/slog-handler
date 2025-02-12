@@ -13,7 +13,19 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"golang.org/x/term"
 )
+
+var width int = 0
+
+func init() {
+	w, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		width = 80
+		return
+	}
+	width = w - 1
+}
 
 type Handler struct {
 	json                  bool
@@ -24,6 +36,7 @@ type Handler struct {
 	timeFormat            string
 	textOutputFormat      string
 	groupTextOutputFormat string
+	groupRightJustify     bool
 	level                 slog.Level
 
 	color      bool
@@ -100,7 +113,7 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 	})
 
 	textFormat := func() string {
-		if n.group != "" {
+		if n.group != "" && !n.groupRightJustify {
 			return fmt.Sprintf(n.groupTextOutputFormat, n.group, n.textOutputFormat)
 		}
 		return n.textOutputFormat
@@ -166,17 +179,24 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 	}
 
 	if !n.json {
-		if len(attrs) == 0 {
-			printerf(outLoc(), pid, textFormat(), recordLevel, record.Time.Format(n.timeFormat), record.Message)
-		} else {
-			attsString := strings.Builder{}
+		output := textFormat()
+		attsString := strings.Builder{}
+
+		if len(attrs) != 0 {
+			output = strings.TrimSpace(output)
 			for i, a := range attrs {
 				attsString.WriteString(a.String())
 				if i < len(attrs)-1 {
 					attsString.WriteString(" ")
 				}
 			}
-			output := strings.TrimSpace(textFormat()) + " " + attsString.String() + "\n"
+			attsString.WriteString("\n")
+			output = output + " " + attsString.String()
+		}
+
+		if n.groupRightJustify {
+			printerrj(outLoc(), n.group, pid, output, recordLevel, record.Time.Format(n.timeFormat), record.Message)
+		} else {
 			printerf(outLoc(), pid, output, recordLevel, record.Time.Format(n.timeFormat), record.Message)
 		}
 	} else {
