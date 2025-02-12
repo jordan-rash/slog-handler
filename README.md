@@ -6,11 +6,11 @@
 
 # SLOG Handler with more knobs
 
-As great as `log/slog` is, the provided handlers don't have enough customization knobs.  This tries to 
+As great as `log/slog` is, the provided handlers don't have enough customization knobs. This tries to
 provide more flexibility to the user.
 
-
 ## Installation
+
 ```shell
 go get disorder.dev/shandler
 ```
@@ -18,49 +18,70 @@ go get disorder.dev/shandler
 ## Features
 
 #### WithJSON
-Enables JSON output for the log message.  This is useful for structured logging.
+
+Enables JSON output for the log message. This is useful for structured logging.
 
 #### WithLogLevel
-Controls the log level for the message.  This is useful for filtering messages.
+
+Controls the log level for the message. This is useful for filtering messages.
 
 #### WithTimeFormat
+
 Controls the time format for the messages.
 
 #### WithTextOutputFormat
-This is a format string that gets used in text based logs.  It takes 3 strings: time, level, and message (in that order).  Include a newline at the end of your string.
+
+This is a format string that gets used in text based logs. It takes 3 strings: time, level, and message (in that order). Include a newline at the end of your string.
 
 #### WithStdOut
+
 Controls which `io.Writer` is used for non-error log messages.
 
-#### WithStdErr 
+#### WithStdErr
+
 Controls which `io.Writer` is used for error messages.
 
 #### WithColor
+
 Adds color to the log levels in text mode
 
 #### With{Debug|Info|Warn|Error}Color
+
 Overrides the default color for the log level.
 
 #### WithShortLevels
-Prints 3 character log levels instead of the full name.  In text mode, this helps keep the log lines visually straight.
+
+Prints 3 character log levels instead of the full name. In text mode, this helps keep the log lines visually straight.
+
+#### WithPid
+
+Adds the process ID to the log message.
+
+#### WithGroupRightJustify
+
+Right justifies the log group name. This is useful for visually grouping log messages.
+Will attempt to calculate terminal width; if an error occurs, it will default to 80 characters.
+Overrides WithGroupTextOutputFormat
 
 ## Examples
 
-```go 
+```go
 logger = slog.New(shandler.NewHandler(
-	shandler.WithLogLevel(slog.LevelDebug),
-	shandler.WithTimeFormat(time.RFC822),
-	shandler.WithTextOutputFormat("%s | %s | %s\n"),
-	shandler.WithStdErr(os.Stdout),
+ shandler.WithLogLevel(slog.LevelDebug),
+ shandler.WithTimeFormat(time.RFC822),
+ shandler.WithTextOutputFormat("%s | %s | %s\n"),
+ shandler.WithStdErr(os.Stdout),
 ))
 logger.With(slog.String("app", "myapp")).Debug("test")
 ```
 
 #### Trace Log Level
-Library includes an easier way to log trace messages.  This is useful for debugging chatty logs.
+
+Library includes an easier way to log trace messages. This is useful for debugging chatty logs.
+
 ```go
 logger = slog.New(shandler.NewHandler(
-	shandler.WithLogLevel(shandler.LevelTrace),
+ shandler.WithLogLevel(shandler.LevelTrace),
 ))
 logger.Log(context.Background(), shandler.LevelTrace, "trace test")
 ```
@@ -82,4 +103,4 @@ PASS
 ok      disorder.dev/shandler   6.604s
 ```
 
-> The JSON Handler here is much slower as it uses the JSON library under the covers.  The stdlib implementation builds the string manually, so its faster.  🤷🏼‍♀️
+> The JSON Handler here is much slower as it uses the JSON library under the covers. The stdlib implementation builds the string manually, so its faster. 🤷🏼‍♀️
