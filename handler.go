@@ -7,6 +7,8 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"path/filepath"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -31,6 +33,7 @@ type Handler struct {
 	json                  bool
 	pid                   bool
 	shortLevels           bool
+	lineInfo              bool
 	out                   []io.Writer
 	err                   []io.Writer
 	timeFormat            string
@@ -61,6 +64,7 @@ func NewHandler(opts ...HandlerOption) *Handler {
 		out:                   []io.Writer{os.Stdout},
 		err:                   []io.Writer{os.Stderr},
 		shortLevels:           false,
+		lineInfo:              false,
 		timeFormat:            time.TimeOnly,
 		textOutputFormat:      "[%s] %s - %s\n",
 		groupTextOutputFormat: "%s | %s",
@@ -111,6 +115,17 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 		attrs = append(attrs, attr)
 		return true
 	})
+
+	// This was adapted from stdlib record.go:219
+	if n.lineInfo {
+		fs := runtime.CallersFrames([]uintptr{record.PC})
+		f, _ := fs.Next()
+
+		fileBase := filepath.Base(f.File)
+		logLine := fmt.Sprintf("%s:%d", fileBase, f.Line)
+
+		attrs = append(attrs, slog.String("slog_line_location", logLine))
+	}
 
 	textFormat := func() string {
 		if n.group != "" && !n.groupRightJustify {
@@ -251,9 +266,10 @@ func (n Handler) MarshalJSON() ([]byte, error) {
 		a[aT.Key] = attrValue{Kind: aT.Value.Kind(), Value: aT.Value.String()}
 	}
 
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"json":                     n.json,
 		"short_levels":             n.shortLevels,
+		"line_info":                n.lineInfo,
 		"time_format":              n.timeFormat,
 		"text_output_format":       n.textOutputFormat,
 		"group_text_output_format": n.groupTextOutputFormat,
@@ -275,6 +291,7 @@ func (n *Handler) UnmarshalJSON(data []byte) error {
 	temp := struct {
 		Json                  bool                 `json:"json"`
 		ShortLevels           bool                 `json:"short_levels"`
+		LineInfo              bool                 `json:"line_info"`
 		TimeFormat            string               `json:"time_format"`
 		TextOutputFormat      string               `json:"text_output_format"`
 		GroupTextOutputFormat string               `json:"group_text_output_format"`

@@ -35,6 +35,12 @@ func WithTimeFormat(format string) HandlerOption {
 	}
 }
 
+func WithLineInfo() HandlerOption {
+	return func(h *Handler) {
+		h.lineInfo = true
+	}
+}
+
 // WithTextOutputFormat sets the format for the group output.
 // The order of the fields are:
 // 1. Record Level (Debug, Info, Warn, Error)
