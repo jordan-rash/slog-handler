@@ -124,7 +124,11 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 		fileBase := filepath.Base(f.File)
 		logLine := fmt.Sprintf("%s:%d", fileBase, f.Line)
 
-		attrs = append(attrs, slog.String("slog_line_location", logLine))
+		if fileBase != "" && logLine != "" {
+			attrs = append(attrs, slog.String("slog_line_location", logLine))
+		} else {
+			attrs = append(attrs, slog.String("slog_line_location", "unknown"))
+		}
 	}
 
 	textFormat := func() string {
