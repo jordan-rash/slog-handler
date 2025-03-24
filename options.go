@@ -35,9 +35,10 @@ func WithTimeFormat(format string) HandlerOption {
 	}
 }
 
-func WithLineInfo() HandlerOption {
+func WithLineInfo(short bool) HandlerOption {
 	return func(h *Handler) {
 		h.lineInfo = true
+		h.lineInfoShort = short
 	}
 }
 

@@ -209,12 +209,20 @@ func TestFromConfig(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("copyme | [INFO] %s - test foo=bar\n", now), stdout.String())
 }
 
-func TestLogWithLineInfo(t *testing.T) {
+func TestLogWithLineInfoShort(t *testing.T) {
 	var stdout bytes.Buffer
 	now := time.Now().Format(time.TimeOnly)
-	logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithLineInfo()))
+	logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithLineInfo(true)))
 	logger.Info("test")
-	assert.Equal(t, stdout.String(), fmt.Sprintf("[INFO] %s - test slog_line_location=handler_test.go:216\n", now))
+	assert.Equal(t, fmt.Sprintf("[INFO] %s - test slog_info=handler_test.go:216\n", now), stdout.String())
+}
+
+func TestLogWithLineInfoLong(t *testing.T) {
+	var stdout bytes.Buffer
+	logger := slog.New(handler.NewHandler(handler.WithStdOut(&stdout), handler.WithLineInfo(false)))
+	logger.Info("test")
+	assert.True(t, strings.Contains(stdout.String(), "disorder.dev/shandler_test.TestLogWithLineInfoLong"))
+	assert.True(t, strings.Contains(stdout.String(), "handler_test.go:223"))
 }
 
 func TestLogWithPid(t *testing.T) {
