@@ -25,6 +25,14 @@ Enables JSON output for the log message. This is useful for structured logging.
 
 Controls the log level for the message. This is useful for filtering messages.
 
+#### WithLineInfo(short)
+
+Adds the file and line number to a `slog_info` attribute within the log message
+if `short == true`; the file basename and line number are included.
+if `short == false`; the function name, full file path, and line number are included.
+
+`short` is `true` by default. This is helpful in smaller programs where the full path is not needed.
+
 #### WithTimeFormat
 
 Controls the time format for the messages.

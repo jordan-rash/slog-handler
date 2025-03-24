@@ -30,10 +30,13 @@ func init() {
 }
 
 type Handler struct {
-	json                  bool
-	pid                   bool
-	shortLevels           bool
-	lineInfo              bool
+	json        bool
+	pid         bool
+	shortLevels bool
+
+	lineInfo      bool
+	lineInfoShort bool
+
 	out                   []io.Writer
 	err                   []io.Writer
 	timeFormat            string
@@ -65,6 +68,7 @@ func NewHandler(opts ...HandlerOption) *Handler {
 		err:                   []io.Writer{os.Stderr},
 		shortLevels:           false,
 		lineInfo:              false,
+		lineInfoShort:         true,
 		timeFormat:            time.TimeOnly,
 		textOutputFormat:      "[%s] %s - %s\n",
 		groupTextOutputFormat: "%s | %s",
@@ -121,13 +125,18 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 		fs := runtime.CallersFrames([]uintptr{record.PC})
 		f, _ := fs.Next()
 
-		fileBase := filepath.Base(f.File)
-		logLine := fmt.Sprintf("%s:%d", fileBase, f.Line)
-
-		if fileBase != "" && logLine != "" {
-			attrs = append(attrs, slog.String("slog_line_location", logLine))
+		var logLine string
+		if n.lineInfoShort {
+			fileBase := filepath.Base(f.File)
+			logLine = fmt.Sprintf("%s:%d", fileBase, f.Line)
 		} else {
-			attrs = append(attrs, slog.String("slog_line_location", "unknown"))
+			logLine = fmt.Sprintf("%s [%s:%d]", f.Function, f.File, f.Line)
+		}
+
+		if logLine != "" {
+			attrs = append(attrs, slog.String("slog_info", logLine))
+		} else {
+			attrs = append(attrs, slog.String("slog_info", "unknown"))
 		}
 	}
 
