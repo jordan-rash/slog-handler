@@ -241,6 +241,14 @@ func TestRightJustifyGroup(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("[INFO] %s - test%*s\n", now, 80-22, "group"), stdout.String()) // 22 is the length of message
 }
 
+func TestErrorTags(t *testing.T) {
+	var stderr bytes.Buffer
+	now := time.Now().Format(time.TimeOnly)
+	logger := slog.New(handler.NewHandler(handler.WithStdErr(&stderr), handler.WithErrorTag()))
+	logger.Error("test")
+	assert.Contains(t, stderr.String(), fmt.Sprintf("[ERROR] %s - test error_id=", now))
+}
+
 func BenchmarkHandlers(b *testing.B) {
 	var stdout bytes.Buffer
 	bt := []struct {

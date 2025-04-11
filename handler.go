@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/nats-io/nuid"
 	"golang.org/x/term"
 )
 
@@ -45,6 +46,9 @@ type Handler struct {
 	groupRightJustify     bool
 	level                 slog.Level
 
+	errorTag     bool
+	errorTagNuid *nuid.NUID
+
 	color      bool
 	traceColor string
 	debugColor string
@@ -74,6 +78,7 @@ func NewHandler(opts ...HandlerOption) *Handler {
 		groupTextOutputFormat: "%s | %s",
 		groupFilter:           []string{},
 		level:                 slog.LevelInfo,
+		errorTag:              false,
 		color:                 false,
 		traceColor:            "#C0C0C0", // Gray
 		debugColor:            "#FFE6FF", // Light Pink
@@ -85,6 +90,10 @@ func NewHandler(opts ...HandlerOption) *Handler {
 
 	for _, opt := range opts {
 		opt(nh)
+	}
+
+	if nh.errorTag {
+		nh.errorTagNuid = nuid.New()
 	}
 
 	return nh
@@ -204,6 +213,11 @@ func (n *Handler) Handle(ctx context.Context, record slog.Record) error {
 	var pid string
 	if n.pid {
 		pid = strconv.Itoa(os.Getpid())
+	}
+
+	if n.errorTag && n.errorTagNuid != nil && record.Level >= slog.LevelError {
+		eTag := n.errorTagNuid.Next()
+		attrs = append(attrs, slog.String("error_id", eTag))
 	}
 
 	if !n.json {
