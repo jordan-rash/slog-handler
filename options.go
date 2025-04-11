@@ -136,3 +136,11 @@ func WithGroupFilter(filter []string) HandlerOption {
 		h.groupFilter = filter
 	}
 }
+
+// The handler will append a "error_id" field to the log record
+// with a unique id for the error for easier tracking
+func WithErrorTag() HandlerOption {
+	return func(h *Handler) {
+		h.errorTag = true
+	}
+}
