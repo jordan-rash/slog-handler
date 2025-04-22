@@ -3,6 +3,7 @@ package shandler_test
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -247,6 +248,18 @@ func TestErrorTags(t *testing.T) {
 	logger := slog.New(handler.NewHandler(handler.WithStdErr(&stderr), handler.WithErrorTag()))
 	logger.Error("test")
 	assert.Contains(t, stderr.String(), fmt.Sprintf("[ERROR] %s - test error_id=", now))
+}
+
+func TestSlogAnyErrorWithJsonOption(t *testing.T) {
+	var stderr bytes.Buffer
+	now := time.Now().Format(time.TimeOnly)
+	logger := slog.New(handler.NewHandler(
+		handler.WithStdErr(&stderr),
+		handler.WithJSON(),
+	))
+	err := errors.New("big error")
+	logger.Error("test", slog.Any("err", err))
+	assert.Equal(t, fmt.Sprintf(`{"level":"ERROR","time":"%s","message":"test","attrs":{"err":"big error"}}\n`, now), stderr.String())
 }
 
 func BenchmarkHandlers(b *testing.B) {
