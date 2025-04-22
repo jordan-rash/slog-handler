@@ -403,3 +403,23 @@ type jsonLog struct {
 	Attrs   map[string]any `json:"attrs,omitempty"`
 	Pid     string         `json:"pid,omitempty"`
 }
+
+func (j jsonLog) MarshalJSON() ([]byte, error) {
+	a := map[string]any{}
+	for key, value := range j.Attrs {
+		if err, ok := value.(error); ok {
+			a[key] = err.Error()
+		} else {
+			a[key] = value
+		}
+	}
+
+	return json.Marshal(jsonLog{
+		Level:   j.Level,
+		Time:    j.Time,
+		Message: j.Message,
+		Group:   j.Group,
+		Attrs:   a,
+		Pid:     j.Pid,
+	})
+}
