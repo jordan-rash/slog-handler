@@ -250,16 +250,35 @@ func TestErrorTags(t *testing.T) {
 	assert.Contains(t, stderr.String(), fmt.Sprintf("[ERROR] %s - test error_id=", now))
 }
 
-func TestSlogAnyErrorWithJsonOption(t *testing.T) {
-	var stderr bytes.Buffer
+func TestSlogAnyError(t *testing.T) {
 	now := time.Now().Format(time.TimeOnly)
-	logger := slog.New(handler.NewHandler(
-		handler.WithStdErr(&stderr),
-		handler.WithJSON(),
-	))
-	err := errors.New("big error")
-	logger.Error("test", slog.Any("err", err))
-	assert.Equal(t, fmt.Sprintf(`{"level":"ERROR","time":"%s","message":"test","attrs":{"err":"big error"}}\n`, now), stderr.String())
+	tests := []struct {
+		name     string
+		opts     []handler.HandlerOption
+		expected string
+	}{
+		{
+			name:     "text",
+			opts:     []handler.HandlerOption{},
+			expected: fmt.Sprintf(`[ERROR] %s - test err=big error`, now),
+		},
+		{
+			name:     "json",
+			opts:     []handler.HandlerOption{handler.WithJSON()},
+			expected: fmt.Sprintf(`{"level":"ERROR","time":"%s","message":"test","attrs":{"err":"big error"}}`, now),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var stderr bytes.Buffer
+			tt.opts = append(tt.opts, handler.WithStdErr(&stderr))
+			logger := slog.New(handler.NewHandler(tt.opts...))
+			err := errors.New("big error")
+			logger.Error("test", slog.Any("err", err))
+			actual := strings.TrimRight(stderr.String(), "\n")
+			assert.Equal(t, tt.expected, actual)
+		})
+	}
 }
 
 func BenchmarkHandlers(b *testing.B) {
