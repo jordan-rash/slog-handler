@@ -414,14 +414,7 @@ func (j jsonLog) MarshalJSON() ([]byte, error) {
 		}
 	}
 
-	return json.Marshal(struct {
-		Level   string         `json:"level"`
-		Time    string         `json:"time"`
-		Message string         `json:"message"`
-		Group   string         `json:"group,omitempty"`
-		Attrs   map[string]any `json:"attrs,omitempty"`
-		Pid     string         `json:"pid,omitempty"`
-	}{
+	return json.Marshal(jsonLog{
 		Level:   j.Level,
 		Time:    j.Time,
 		Message: j.Message,
