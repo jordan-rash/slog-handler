@@ -8,16 +8,16 @@ import (
 
 func printer(src []io.Writer, data ...any) {
 	for _, s := range src {
-		fmt.Fprintln(s, data...)
+		_, _ = fmt.Fprintln(s, data...)
 	}
 }
 
 func printerf(src []io.Writer, pid string, format string, data ...any) {
 	for _, s := range src {
 		if pid == "" {
-			fmt.Fprintf(s, format, data...)
+			_, _ = fmt.Fprintf(s, format, data...)
 		} else {
-			fmt.Fprintf(s, "["+pid+"] "+format, data...)
+			_, _ = fmt.Fprintf(s, "["+pid+"] "+format, data...)
 		}
 	}
 }
@@ -36,6 +36,6 @@ func printerrj(src []io.Writer, g, pid, format string, data ...any) {
 	}
 
 	for _, s := range src {
-		fmt.Fprintf(s, "%s%*s\n", strings.TrimSpace(left), rightWidth, g)
+		_, _ = fmt.Fprintf(s, "%s%*s\n", strings.TrimSpace(left), rightWidth, g)
 	}
 }
