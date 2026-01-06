@@ -1,6 +1,6 @@
 module disorder.dev/shandler
 
-go 1.24.2
+go 1.25.5
 
 require (
 	github.com/charmbracelet/lipgloss v1.1.0
